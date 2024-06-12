@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AttachmentEvent;
+use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -12,7 +14,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        return response()->json(Category::all());
+        return response()->json(CategoryResource::collection(Category::with('icon')->get()));
     }
 
     /**
@@ -20,7 +22,13 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $category = new Category();
+        $category->title = $request->title;
+        $category->save();
+
+        event(new AttachmentEvent($request->icon, $category->icon()));
+
+        return response()->json($category, 201);
     }
 
     /**
