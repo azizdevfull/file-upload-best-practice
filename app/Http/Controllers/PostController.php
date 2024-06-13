@@ -2,48 +2,54 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AttachmentEvent;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
+use App\Services\AttachmentService;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(protected AttachmentService $attachmentService)
+    {
+    }
     public function index()
     {
-        $posts = Post::all();
-
-        return response()->json($posts);
+        return response()->json(PostResource::collection(Post::with('images')->get()));
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $post = new Post();
+        $post->name = $request->name;
+        $post->body = $request->body;
+        $post->save();
+        event(new AttachmentEvent($request->images, $post->images()));
+        return response()->json([
+            "message" => "Success",
+        ]);
+    }
+    public function storeTest(Request $request)
+    {
+        $post = new Post();
+        $post->name = $request->name;
+        $post->body = $request->body;
+        $post->save();
+        // event(new AttachmentEvent($request->images, $post->images()));
+        $this->attachmentService->uploadFile($request->images, $post->images());
+        return response()->json([
+            "message" => "Success",
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         //
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         //

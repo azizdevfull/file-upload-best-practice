@@ -8,16 +8,18 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 final class AttachmentService
 {
+
     public function uploadFile(
         array $files,
         MorphOne|MorphMany|MorphToMany $relation = null,
         string $path = 'files',
         string $identifier = null
     ): array {
-        $result = [];
+        $dataToInsert = [];
         foreach ($files as $file) {
             $type = $file->getClientOriginalExtension();
             $fileName = md5(time() . $file->getFilename()) . '.' . $type;
@@ -29,13 +31,25 @@ final class AttachmentService
                 'path' => "uploads/$path/$fileName",
                 'type' => $file->extension(),
                 'extra_identifier' => $identifier,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
 
-            $relation->create($data);
+            if ($relation) {
+                $data['attachment_type'] = $relation->getMorphClass();
+                $data['attachment_id'] = $relation->getParent()->getKey();
+            }
+
+            $dataToInsert[] = $data;
         }
 
-        return $result;
+        DB::table('attachments')->insert($dataToInsert);
+
+        return $dataToInsert;
     }
+
+
+
 
     public function destroy(array|int|Attachment|Collection $files): void
     {
