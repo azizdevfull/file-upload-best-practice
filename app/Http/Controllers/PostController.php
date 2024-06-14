@@ -23,22 +23,11 @@ class PostController extends Controller
         $post->name = $request->name;
         $post->body = $request->body;
         $post->save();
-        event(new AttachmentEvent($request->images, $post->images()));
+        event(new AttachmentEvent($request->images, $post->images(), 'images'));
         return response()->json([
-            "message" => "Success",
+            'message' => 'Success'
         ]);
-    }
-    public function storeTest(Request $request)
-    {
-        $post = new Post();
-        $post->name = $request->name;
-        $post->body = $request->body;
-        $post->save();
-        // event(new AttachmentEvent($request->images, $post->images()));
-        $this->attachmentService->uploadFile($request->images, $post->images());
-        return response()->json([
-            "message" => "Success",
-        ]);
+
     }
 
     public function show(string $id)

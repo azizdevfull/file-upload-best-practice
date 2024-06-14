@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 class CategoryController extends Controller
 {
 
+    public function __construct(protected AttachmentService $attachmentService)
+    {
+    }
     public function index()
     {
         return response()->json(CategoryResource::collection(Category::with('icon')->get()));
@@ -35,5 +38,8 @@ class CategoryController extends Controller
 
     public function destroy(string $id)
     {
+        $category = Category::findOrFail($id);
+        $this->attachmentService->destroy($category->icon);
+        $category->delete();
     }
 }

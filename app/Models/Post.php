@@ -16,4 +16,5 @@ class Post extends Model
     {
         return $this->morphMany(Attachment::class, 'attachment');
     }
+
 }
