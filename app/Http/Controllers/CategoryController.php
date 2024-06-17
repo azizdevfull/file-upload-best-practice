@@ -41,5 +41,9 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
         $this->attachmentService->destroy($category->icon);
         $category->delete();
+
+        return response()->json([
+            'message' => 'Success'
+        ]);
     }
 }
