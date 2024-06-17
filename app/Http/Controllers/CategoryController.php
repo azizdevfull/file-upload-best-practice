@@ -24,7 +24,7 @@ class CategoryController extends Controller
         $category->title = $request->title;
         $category->save();
 
-        event(new AttachmentEvent($request->icon, $category->icon()));
+        event(new AttachmentEvent($request->icon, $category->icon(), 'categories'));
 
         return response()->json($category, 201);
     }

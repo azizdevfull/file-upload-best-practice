@@ -23,7 +23,7 @@ class PostController extends Controller
         $post->name = $request->name;
         $post->body = $request->body;
         $post->save();
-        event(new AttachmentEvent($request->images, $post->images()));
+        event(new AttachmentEvent($request->images, $post->images(), 'posts'));
         return response()->json([
             'message' => 'Success'
         ]);
@@ -41,5 +41,12 @@ class PostController extends Controller
     }
     public function destroy(string $id)
     {
+        $post = Post::findOrFail($id);
+        $this->attachmentService->destroy($post->images);
+        $post->delete();
+
+        return response()->json([
+            'message' => 'Success'
+        ]);
     }
 }
